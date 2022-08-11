@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+сторіка публікацій
+{% endblock %}
+
+{% block body %}
+
+
+    {% for i in all_article %}
+    <div class="container mt-5">
+    <div class="h-100 p-5 bg-light border rounded-3">
+        <h1>{{ i.title }}</h1>
+        <h4>{{ i.intro }}</h4>
+    <a class="btn btn-outline-secondary" href="/posts/{{ i.id }}">Читати статтю</a>
+        <p>{{ i.date.date() }}</p>
+        </div>
+      </div>
+    {% endfor %}
+
+
+
+</div>
+
+
+
+</div>
+
+{% endblock %}
