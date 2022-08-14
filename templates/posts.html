@@ -8,7 +8,7 @@
 {% block body %}
 
 
-    {% for i in all_article %}
+    {% for i in pages.items %}
     <div class="container mt-5">
     <div class="h-100 p-5 bg-light border rounded-3">
         <h1>{{ i.title }}</h1>
@@ -20,11 +20,18 @@
     {% endfor %}
 
 
+<nav class="container mt-5">
+    <nav aria-label="...">
+  <ul class="pagination">
+    <li class="page-item {% if not pages.has_prev %} disabled {% endif %}">
+        <a class="page-link" href="./?page={{ pages.prev_num }}">Previous</a>
+    </li>
 
-</div>
-
-
-
-</div>
+    <li class="page-item {% if not pages.has_next %} disabled {% endif %}">
+      <a class="page-link" href="./?page={{ pages.next_num }}">Next</a>
+    </li>
+  </ul>
+</nav>
+</nav>
 
 {% endblock %}

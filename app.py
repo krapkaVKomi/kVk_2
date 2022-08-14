@@ -6,6 +6,10 @@ from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_security import UserMixin, RoleMixin, SQLAlchemyUserDatastore, Security, login_required, current_user
 
+    ### ЗАДАЧІ
+        # по 10 cтатей на сторінці, а далі перехід на іншу сторінку з наступними
+        # Система тегів і пошуку статей
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kvk_blog.db'
@@ -69,12 +73,6 @@ user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
 
 
-@app.route('/index')
-@app.route('/')
-def index():
-    return render_template("index.html")
-
-
 @app.route('/about')
 def about():
     return 'about page'
@@ -82,7 +80,7 @@ def about():
 
 @app.route('/registration', methods=['POST', 'GET'])
 def registration():
-   if request.method == "POST":
+    if request.method == "POST":
         email = request.form['email']
         password = request.form['password']
         password2 = request.form['password2']
@@ -98,7 +96,6 @@ def registration():
         except:
             return "Помилка бази даних"
         if user != []:
-            print(user)
             erors.append('Помилка!   Електронна адреса зайнята')
         # перевіркка паролю
         if len(password) < 6 or len(password) > 33:
@@ -112,18 +109,18 @@ def registration():
             pass
         # створюємо і відправляємо екземпляр класу User
         if len(erors) == 0:
-           new_user = User(email=email, password=password, active=1)
-           try:
-               db.session.add(new_user)
-               db.session.commit()
-               return redirect('/login')
-           except:
-               return "Помилка при записі нового користувача в базу даних"
+            new_user = User(email=email, password=password, active=1)
+            try:
+                db.session.add(new_user)
+                db.session.commit()
+                return redirect('/login')
+            except:
+                return "Помилка при записі нового користувача в базу даних"
         else:
             return render_template('registration.html', erors=erors)
 
-   else:
-       return render_template("registration.html", erors='')
+    else:
+        return render_template("registration.html", erors='')
 
 
 @app.route('/add-article', methods=['POST', 'GET'])
@@ -139,7 +136,7 @@ def create_article():
         try:
             db.session.add(article)
             db.session.commit()
-            return 'all ok'
+            return redirect('/posts')
         except:
             return "Помилка при записі статті в базу даних"
     else:
@@ -147,9 +144,13 @@ def create_article():
 
 
 @app.route('/posts')
-def posts():
-    all_article = Articles.query.order_by(Articles.date.desc()).all()
-    return render_template("posts.html", all_article=all_article)
+@app.route('/index')
+@app.route('/')
+def index():
+    posts = Articles.query.order_by(Articles.date.desc()).all()
+
+    pages = Articles.query.order_by(Articles.date.desc()).paginate(per_page=2)
+    return render_template("posts.html", posts=posts, pages=pages)
 
 
 @app.route('/posts/<int:id>')
