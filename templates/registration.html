@@ -13,33 +13,39 @@
     <div class="text-center">
         <h1 class="h3 mb-3 fw-normal">Приєднуйся <a class="btn btn-success" href="/login">Вхід</a></h1>
 
+        </div>
             {% for i in erors %}
-            <h5 style="color:crimson ;">{{ i }}</h5>
+             <h5 style="color:crimson ;">{{ i }}</h5>
             {% endfor %}
+
     <form method="post">
+        <p>
+  </p>
         <div class="form-floating">
-            <input type="text" name="name" id="name" class="form-control" placeholder="Ведіть нік-нейм">
-            <label for="floatingInput">your nickname</label>
+            <p> Your nickname</p>
+            <input type="text" name="name" id="name" class="form-control">
         </div>
         <div class="form-floating">
-            <input type="text" name="email" id="email" class="form-control" placeholder="Ведіть електронну адресу">
-            <label for="floatingInput">Email address</label>
+            <p> Your email</p>
+            <input type="text" name="email" id="email" class="form-control">
         </div>
         <div class="form-floating">
-            <input type="password" name="password" id="password" class="form-control" placeholder="Пароль">
-            <label for="floatingPassword">Password</label>
+            <p> Your password</p>
+            <input type="password" name="password" id="password" class="form-control">
         </div>
         <div class="form-floating">
-            <input type="password" name="password2" id="password2" class="form-control" placeholder="Підтвердіть пароль">
-            <label for="floatingPassword">Repeat рassword</label>
+            <p> Repeat рassword</p>
+            <input type="password" name="password2" id="password2" class="form-control">
         </div>
+    </form>
         <br>
+        <div class="container">
         <input class="btn btn-success" type="submit" value="Зареєструватися">
         <p class="mt-5 mb-3 text-muted">&copy; 2022</p>
-    </div>
 
-    </div>
 </div>
+    </div>
+        </div>
 
 
 {% endblock %}
