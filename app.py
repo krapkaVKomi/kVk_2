@@ -75,7 +75,7 @@ security = Security(app, user_datastore)
 
 @app.route('/about')
 def about():
-    return 'about page'
+    return render_template('test.html')
 
 
 @app.route('/registration', methods=['POST', 'GET'])

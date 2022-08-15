@@ -25,7 +25,7 @@ login
 
 <form action="{{ url_for_security('login') }}" method="POST" name="login_user_form">
   {{ login_user_form.hidden_tag() }}
-  {{ render_field_with_errors(login_user_form.email, class="form-control" )}}
+  {{ render_field_with_errors(login_user_form.email, class="form-control")}}
   {{ render_field_with_errors(login_user_form.password, class="form-control") }}
   {{ render_field_with_errors(login_user_form.remember) }}
   {{ render_field(login_user_form.next) }}
