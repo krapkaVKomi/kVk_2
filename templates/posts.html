@@ -23,14 +23,17 @@
 <nav class="container mt-5">
     <nav aria-label="...">
   <ul class="pagination">
+      {% if pages.has_prev %}
     <li class="page-item {% if not pages.has_prev %}  disabled {% endif %}">
 
-        <a class="page-link" style="color: black" href="./?page={{ pages.prev_num }}"><h5>< Previous </h5></a>
+        <a class="page-link" style="color: rgba(22, 38, 26, 0.444)" href="./?page={{ pages.prev_num }}"><h5>< Previous </h5></a>
     </li>
-
+      {% endif %}
+      {% if pages.has_next %}
     <li class="page-item {% if not pages.has_next %} disabled {% endif %}">
-      <a class="page-link" style="color: black" href="./?page={{ pages.next_num }}"> <h5>Next></h5></a>
+      <a class="page-link" style="color: rgba(22, 38, 26, 0.444)" href="./?page={{ pages.next_num }}"> <h5>Next></h5></a>
     </li>
+      {% endif %}
   </ul>
 </nav>
 </nav>

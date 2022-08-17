@@ -13,57 +13,53 @@
     <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
-  <nav class="navbar navbar-dark bg-dark" aria-label="First navbar example">
-
+ 
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-
-
-      {% if current_user.is_anonymous == False %}
-        <a type="button" href="/add-article" class="btn btn-dark">add article</a>
+        
+      <a class="navbar-brand" href="/posts">Krapka_v_komi</a>
+     
+        {% if current_user.is_anonymous == False %}
+        <a class="btn btn-dark" href="/add-article" style="color:slategrey ;">Add article</a>
+      {% endif %}
+         {% if current_user.is_anonymous == False %}
+        <a class="btn btn-dark" href="/logout" style="color:slategrey ;">Logout</a>
+      {% endif %}
+         {% if current_user.has_role('admin') %}
+        <a type="button" href="/admin" style="color:slategrey ;" class="btn btn-dark">Admin</a>
       {% endif %}
 
-
-      <a class="navbar-brand" href="/posts">krapka_v_komi</a>
-
-
-      <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample01" aria-controls="navbarsExample01" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
       </button>
-
-
-
-      <div class="navbar-collapse collapse" id="navbarsExample01" style="">
-        <ul class="navbar-nav me-auto mb-2">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/registration">registration</a>
-          </li>
-           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/login">login</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/admin">admin</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/logout">logout</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-          </li>
+      <div class="collapse navbar-collapse" id="navbarNavDarkDropdown">
+        {% if current_user.is_anonymous == True %}
+        <ul class="navbar-nav">
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</a>
-            <ul class="dropdown-menu" aria-labelledby="dropdown01">
-              <li><a class="dropdown-item" href="#">Action</a></li>
-              <li><a class="dropdown-item" href="#">Another action</a></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+             Authentication
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+              <li><a class="dropdown-item" href="/login">Login</a></li>
+              <li><a class="dropdown-item" href="/registration">Registration</a></li>
+             
             </ul>
           </li>
         </ul>
-        <form>
-          <input class="form-control" type="text" placeholder="Search" aria-label="Search">
-        </form>
+        {% endif %}  
       </div>
     </div>
   </nav>
+
+
+
+
+
+
+
+
+
+     
+
+
 
 
     {% block body %}{% endblock %}
