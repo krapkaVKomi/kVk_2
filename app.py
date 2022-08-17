@@ -6,8 +6,9 @@ from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_security import UserMixin, RoleMixin, SQLAlchemyUserDatastore, Security, login_required, current_user
 
+
     ### ЗАДАЧІ
-        # по 10 cтатей на сторінці, а далі перехід на іншу сторінку з наступними
+        # Зображення в статтях
         # Система тегів і пошуку статей
 
 
@@ -36,12 +37,15 @@ roles_users = db.Table('roles_users',
                        )
 
 
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(255))
     active = db.Column(db.Boolean())
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
+
+    posts = db.relationship('Articles', backref='poster')
 
 
 class Role(db.Model, RoleMixin):
@@ -59,6 +63,8 @@ class Articles(db.Model):
     text = db.Column(db.Text(50000), nullable=True)
     user = db.Column(db.String(50), nullable=True)
 
+    poster_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
 
 class AdminView(ModelView):
     def is_accessible(self):
@@ -73,9 +79,12 @@ user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
 
 
-@app.route('/about')
-def about():
-    return render_template('test.html')
+def familiar():
+    try:
+        a = current_user.id
+        return True
+    except:
+        return False
 
 
 @app.route('/registration', methods=['POST', 'GET'])

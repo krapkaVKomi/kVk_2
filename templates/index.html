@@ -5,8 +5,17 @@
 Головна сторінка сайту
 {% endblock %}
 
+{% if test == 1 %}
+
+
 {% block body %}
+<h5>{{ test }}</h5>
 
-<h1>щось пішло не так</h1>
+
 {% endblock %}
+{% endif %}
 
+{% if test != 1 %}
+
+<h5> wow gg</h5>
+{% endif %}
