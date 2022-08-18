@@ -1,15 +1,24 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from email_validator import validate_email, EmailNotValidError
 from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_security import UserMixin, RoleMixin, SQLAlchemyUserDatastore, Security, login_required, current_user
-
+import os
+from werkzeug.utils import secure_filename
 
     ### ЗАДАЧІ
         # Зображення в статтях
         # Система тегів і пошуку статей
+        # Профіль узера
+        # Переписати фласк логін ( вхід )
+
+
+# папка для сохранения загруженных файлов
+UPLOAD_FOLDER = 'static/images/'
+# расширения файлов, которые разрешено загружать
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 
 app = Flask(__name__)
@@ -19,7 +28,8 @@ app.secret_key = 'super secret key'
 app.config['SECURITY_PASSWORD_SALT'] = 'some arbitrary super secret string'
 
 db = SQLAlchemy(app)
-
+# конфигурируем
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 class HomeAdminView(AdminIndexView):
     def is_accessible(self):
@@ -35,7 +45,6 @@ roles_users = db.Table('roles_users',
                        db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
                        db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
                        )
-
 
 
 class User(db.Model, UserMixin):
@@ -87,6 +96,17 @@ def familiar():
         return False
 
 
+@app.route('/uploads/<name>')
+def download_file(name):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], name)
+
+
+def allowed_file(filename):
+    """ Функция проверки расширения файла """
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 @app.route('/registration', methods=['POST', 'GET'])
 def registration():
     if request.method == "POST":
@@ -132,24 +152,42 @@ def registration():
         return render_template("registration.html", erors='')
 
 
-@app.route('/add-article', methods=['POST', 'GET'])
-@login_required
-def create_article():
-    if request.method == "POST":
+@app.route('/add-article', methods=['GET', 'POST'])
+def upload_file2():
+    if request.method == 'POST':
+        # проверим, передается ли в запросе файл
+        if 'file' not in request.files:
+            # После перенаправления на страницу загрузки
+            # покажем сообщение пользователю
+            flash('Не могу прочитать файл')
+            return redirect(request.url)
+        file = request.files['file']
         title = request.form['title']
         intro = request.form['intro']
         text = request.form['text']
         user = request.form['user']
 
         article = Articles(title=title, intro=intro, text=text, user=user)
-        try:
-            db.session.add(article)
-            db.session.commit()
-            return redirect('/posts')
-        except:
-            return "Помилка при записі статті в базу даних"
-    else:
-        return render_template("create-article.html")
+
+        db.session.add(article)
+        db.session.commit()
+
+        # Если файл не выбран, то браузер может
+        # отправить пустой файл без имени.
+        if file.filename == '':
+            flash('Нет выбранного файла')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            # безопасно извлекаем оригинальное имя файла
+            filename = secure_filename(file.filename)
+            # сохраняем файл
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            # если все прошло успешно, то перенаправляем
+            # на функцию-представление `download_file`
+            # для скачивания файла
+            return redirect(url_for('download_file', name=filename))
+    return render_template("add_article.html")
+
 
 
 @app.route('/posts')
@@ -166,6 +204,14 @@ def index():
 def post(id):
     article = Articles.query.get(id)
     return render_template("post.html", article=article)
+
+
+@app.route('/profile')
+@login_required
+def profile():
+    #user_id = current_user.id
+    #article = Articles.query.get(id)
+    return render_template("profile.html")
 
 
 if __name__ == "__main__":
