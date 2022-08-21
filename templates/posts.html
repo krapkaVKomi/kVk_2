@@ -6,33 +6,30 @@
 {% endblock %}
 
 {% block body %}
-
+<div class="container mt-5">
+    <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
+          <input type="search" class="form-control form-control-dark text-bg-dark" placeholder="Search..." aria-label="Search">
+    </form><br>
 
     {% for i in pages.items %}
-    <div class="container mt-5">
+ <br>
     <div class="h-100 p-5 bg-light border rounded-3">
         <h1>{{ i.title }}</h1>
         <h4>{{ i.intro }}</h4>
     <a class="btn btn-outline-secondary" href="/posts/{{ i.id }}">Читати статтю</a>
         <p>{{ i.date.date() }}</p>
         </div>
-      </div>
     {% endfor %}
-
+ </div>
 
 <nav class="container mt-5">
     <nav aria-label="...">
   <ul class="pagination">
       {% if pages.has_prev %}
-    <li class="page-item {% if not pages.has_prev %}  disabled {% endif %}">
-
-        <a class="page-link" style="color: rgba(22, 38, 26, 0.444)" href="./?page={{ pages.prev_num }}"><h5>< Previous </h5></a>
-    </li>
+        <a class="page-link" style="color:darkslategrey" href="./?page={{ pages.prev_num }}"><h5>< Previous </h5></a>
       {% endif %}
       {% if pages.has_next %}
-    <li class="page-item {% if not pages.has_next %} disabled {% endif %}">
-      <a class="page-link" style="color: rgba(22, 38, 26, 0.444)" href="./?page={{ pages.next_num }}"> <h5>Next></h5></a>
-    </li>
+      <a class="page-link" style="color:darkslategrey" href="./?page={{ pages.next_num }}"> <h5>Next></h5></a>
       {% endif %}
   </ul>
 </nav>

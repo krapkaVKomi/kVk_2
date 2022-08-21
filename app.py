@@ -22,14 +22,13 @@ ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kvk_blog.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kvk_blog2.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'super secret key'
 app.config['SECURITY_PASSWORD_SALT'] = 'some arbitrary super secret string'
-
-db = SQLAlchemy(app)
-# конфигурируем
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+db = SQLAlchemy(app)
+
 
 class HomeAdminView(AdminIndexView):
     def is_accessible(self):
@@ -53,8 +52,9 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(255))
     active = db.Column(db.Boolean())
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
-
     posts = db.relationship('Articles', backref='poster')
+    avatar = db.Column(db.String(50), nullable=True)
+    name = db.Column(db.String(50))
 
 
 class Role(db.Model, RoleMixin):
@@ -71,8 +71,8 @@ class Articles(db.Model):
     intro = db.Column(db.String(500), nullable=True)
     text = db.Column(db.Text(50000), nullable=True)
     user = db.Column(db.String(50), nullable=True)
-
     poster_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    img = db.Column(db.Text(50000), nullable=True)
 
 
 class AdminView(ModelView):
@@ -86,14 +86,6 @@ class AdminView(ModelView):
 admin.add_view(AdminView(Articles, db.session))
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
-
-
-def familiar():
-    try:
-        a = current_user.id
-        return True
-    except:
-        return False
 
 
 @app.route('/uploads/<name>')
@@ -113,6 +105,7 @@ def registration():
         email = request.form['email']
         password = request.form['password']
         password2 = request.form['password2']
+        name = request.form['name']
         erors = []
 
         # перевірка поля email
@@ -138,7 +131,7 @@ def registration():
             pass
         # створюємо і відправляємо екземпляр класу User
         if len(erors) == 0:
-            new_user = User(email=email, password=password, active=1)
+            new_user = User(email=email, password=password, active=1, name=name)
             try:
                 db.session.add(new_user)
                 db.session.commit()
@@ -153,13 +146,13 @@ def registration():
 
 
 @app.route('/add-article', methods=['GET', 'POST'])
-def upload_file2():
+def upload_file():
     if request.method == 'POST':
         # проверим, передается ли в запросе файл
         if 'file' not in request.files:
             # После перенаправления на страницу загрузки
             # покажем сообщение пользователю
-            flash('Не могу прочитать файл')
+            flash('Не можу прочитати файл')
             return redirect(request.url)
         file = request.files['file']
         title = request.form['title']
@@ -167,15 +160,17 @@ def upload_file2():
         text = request.form['text']
         user = request.form['user']
 
-        article = Articles(title=title, intro=intro, text=text, user=user)
-
-        db.session.add(article)
-        db.session.commit()
+        article = Articles(title=title, intro=intro, text=text, user=current_user.name)
+        try:
+            db.session.add(article)
+            db.session.commit()
+        except:
+            return "Помилка при записі нового користувача в базу даних"
 
         # Если файл не выбран, то браузер может
         # отправить пустой файл без имени.
         if file.filename == '':
-            flash('Нет выбранного файла')
+            flash('Немає вибраного файлу')
             return redirect(request.url)
         if file and allowed_file(file.filename):
             # безопасно извлекаем оригинальное имя файла
@@ -189,14 +184,13 @@ def upload_file2():
     return render_template("add_article.html")
 
 
-
 @app.route('/posts')
 @app.route('/index')
 @app.route('/')
 def index():
     posts = Articles.query.order_by(Articles.date.desc()).all()
 
-    pages = Articles.query.order_by(Articles.date.desc()).paginate(per_page=2)
+    pages = Articles.query.order_by(Articles.date.desc()).paginate(per_page=5)
     return render_template("posts.html", posts=posts, pages=pages)
 
 
