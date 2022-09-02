@@ -11,8 +11,8 @@ from werkzeug.utils import secure_filename
     ### ЗАДАЧІ
         # Зображення в статтях
         # Система тегів і пошуку статей
-        # Профіль узера
-        # Переписати фласк логін ( вхід )
+        # Профіль юзера
+
 
 
 # папка для сохранения загруженных файлов
@@ -22,7 +22,10 @@ ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kvk_blog2.db'
+
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kvk_blog2.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/kvk_blog'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'super secret key'
 app.config['SECURITY_PASSWORD_SALT'] = 'some arbitrary super secret string'
@@ -69,10 +72,10 @@ class Articles(db.Model):
     date = db.Column(db.DateTime, default=datetime.utcnow)
     title = db.Column(db.String(500), nullable=True)
     intro = db.Column(db.String(500), nullable=True)
-    text = db.Column(db.Text(50000), nullable=True)
+    text = db.Column(db.Text, nullable=True)
     user = db.Column(db.String(50), nullable=True)
     poster_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    img = db.Column(db.Text(50000), nullable=True)
+    img = db.Column(db.Text, nullable=True)
 
 
 class AdminView(ModelView):
@@ -81,6 +84,10 @@ class AdminView(ModelView):
 
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for('security.login', next=request.url))
+
+
+db.create_all()
+db.session.commit()
 
 
 admin.add_view(AdminView(Articles, db.session))
@@ -159,7 +166,7 @@ def upload_file():
         intro = request.form['intro']
         text = request.form['text']
         user = request.form['user']
-
+        print('ggwp')
         article = Articles(title=title, intro=intro, text=text, user=current_user.name)
         try:
             db.session.add(article)
