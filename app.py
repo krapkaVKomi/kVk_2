@@ -5,8 +5,6 @@ from email_validator import validate_email, EmailNotValidError
 from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_security import UserMixin, RoleMixin, SQLAlchemyUserDatastore, Security, login_required, current_user
-import os
-from werkzeug.utils import secure_filename
 
     ### ЗАДАЧІ
         # Зображення в статтях
@@ -14,22 +12,15 @@ from werkzeug.utils import secure_filename
         # Профіль юзера
 
 
-
-# папка для сохранения загруженных файлов
-UPLOAD_FOLDER = 'static/images/'
-# расширения файлов, которые разрешено загружать
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
-
-
 app = Flask(__name__)
 
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kvk_blog2.db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kvk_blog2.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/kvk_blog'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'super secret key'
 app.config['SECURITY_PASSWORD_SALT'] = 'some arbitrary super secret string'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 db = SQLAlchemy(app)
 
 
@@ -100,12 +91,6 @@ def download_file(name):
     return send_from_directory(app.config["UPLOAD_FOLDER"], name)
 
 
-def allowed_file(filename):
-    """ Функция проверки расширения файла """
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
 @app.route('/registration', methods=['POST', 'GET'])
 def registration():
     if request.method == "POST":
@@ -155,13 +140,6 @@ def registration():
 @app.route('/add-article', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
-        # проверим, передается ли в запросе файл
-        if 'file' not in request.files:
-            # После перенаправления на страницу загрузки
-            # покажем сообщение пользователю
-            flash('Не можу прочитати файл')
-            return redirect(request.url)
-        file = request.files['file']
         title = request.form['title']
         intro = request.form['intro']
         text = request.form['text']
@@ -172,22 +150,7 @@ def upload_file():
             db.session.add(article)
             db.session.commit()
         except:
-            return "Помилка при записі нового користувача в базу даних"
-
-        # Если файл не выбран, то браузер может
-        # отправить пустой файл без имени.
-        if file.filename == '':
-            flash('Немає вибраного файлу')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            # безопасно извлекаем оригинальное имя файла
-            filename = secure_filename(file.filename)
-            # сохраняем файл
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            # если все прошло успешно, то перенаправляем
-            # на функцию-представление `download_file`
-            # для скачивания файла
-            return redirect(url_for('download_file', name=filename))
+            return "ERROR WRITING TO DB"
     return render_template("add_article.html")
 
 
@@ -210,8 +173,6 @@ def post(id):
 @app.route('/profile')
 @login_required
 def profile():
-    #user_id = current_user.id
-    #article = Articles.query.get(id)
     return render_template("profile.html")
 
 
