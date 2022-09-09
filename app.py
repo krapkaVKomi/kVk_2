@@ -18,8 +18,8 @@ UPLOAD_FOLDER = 'static/images/'
 # расширения файлов, которые разрешено загружать
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 app = Flask(__name__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kvk_blog2.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/kvk_blog'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kvk_blog3.db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/kvk_blog'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'super secret key'
 app.config['SECURITY_PASSWORD_SALT'] = 'some arbitrary super secret string'
@@ -70,6 +70,13 @@ class Articles(db.Model):
     user = db.Column(db.String(50), nullable=True)
     poster_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     img = db.Column(db.Text, nullable=True)
+
+
+class Avatars(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+    img = db.Column(db.Text)
+    poster_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
 class AdminView(ModelView):
@@ -152,7 +159,6 @@ def upload_file():
         intro = request.form['intro']
         text = request.form['text']
         user = request.form['user']
-        print('ggwp')
         article = Articles(title=title, intro=intro, text=text, user=current_user.name)
         try:
             db.session.add(article)
@@ -208,8 +214,17 @@ def profile():
             for i in a:
                 if i in c:
                     b += i
-            img_name = b + str(current_user.id) + name_add
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], img_name))
+            avatar = b + 'id' + str(current_user.id) + name_add
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], avatar))
+            avatar = 'static/images/' + avatar
+            print(avatar)
+            img = Avatars(img=avatar)
+            try:
+                db.session.add(img)
+                db.session.commit()
+            except:
+                return "ERROR WRITING TO DB"
+
             return render_template("profile.html")
     return render_template("profile.html")
 
