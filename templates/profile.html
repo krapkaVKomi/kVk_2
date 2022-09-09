@@ -7,10 +7,20 @@ profile
 
 {% block body %}
 
+
+<div class="container mt-5">
     <h5>{{ current_user.id }}</h5>
-   <h5>{{ current_user.email }}</h5>
+    <h5>{{ current_user.email }}</h5>
+            {% for i in erors %}
+             <p style="color:crimson ;">{{ i }}</p>
+            {% endfor %}
+    <form method="post" enctype=multipart/form-data>
+        <input type=file name=file id="file"><br>
+        <br>
+        <input type="submit" class="btn btn-success" value="Відправити">
 
-
+    </form>
+</div>
 
 
 

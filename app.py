@@ -5,22 +5,25 @@ from email_validator import validate_email, EmailNotValidError
 from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_security import UserMixin, RoleMixin, SQLAlchemyUserDatastore, Security, login_required, current_user
+from werkzeug.utils import secure_filename
+import os
 
     ### ЗАДАЧІ
         # Зображення в статтях
         # Система тегів і пошуку статей
         # Профіль юзера
 
-
+# папка для сохранения загруженных файлов
+UPLOAD_FOLDER = 'static/images/'
+# расширения файлов, которые разрешено загружать
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 app = Flask(__name__)
-
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kvk_blog2.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/kvk_blog'
-
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'super secret key'
 app.config['SECURITY_PASSWORD_SALT'] = 'some arbitrary super secret string'
-
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 db = SQLAlchemy(app)
 
 
@@ -89,6 +92,11 @@ security = Security(app, user_datastore)
 @app.route('/uploads/<name>')
 def download_file(name):
     return send_from_directory(app.config["UPLOAD_FOLDER"], name)
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.route('/registration', methods=['POST', 'GET'])
@@ -170,9 +178,24 @@ def post(id):
     return render_template("post.html", article=article)
 
 
-@app.route('/profile')
 @login_required
+@app.route('/profile', methods=['GET', 'POST'])
 def profile():
+    erors = []
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            erors.append('ПОМИЛКА!   Неможу прочитати файл')
+            return render_template("profile.html", erors=erors)
+
+        file = request.files['file']
+
+        if file.filename == '':
+            erors.append('ПОМИЛКА!   Немає вибраного файлу')
+            return render_template("profile.html", erors=erors)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return render_template("profile.html")
     return render_template("profile.html")
 
 
