@@ -181,8 +181,8 @@ def post(id):
 @login_required
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
-    erors = []
     if request.method == 'POST':
+        erors = []
         if 'file' not in request.files:
             erors.append('ПОМИЛКА!   Неможу прочитати файл')
             return render_template("profile.html", erors=erors)
@@ -192,9 +192,24 @@ def profile():
         if file.filename == '':
             erors.append('ПОМИЛКА!   Немає вибраного файлу')
             return render_template("profile.html", erors=erors)
+
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            name_add = ''
+            flag = False
+            for i in filename:
+                if i == '.':
+                    flag = True
+                if flag == True:
+                    name_add += i
+            a = str(datetime.utcnow())
+            b = ''
+            c = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+            for i in a:
+                if i in c:
+                    b += i
+            img_name = b + str(current_user.id) + name_add
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], img_name))
             return render_template("profile.html")
     return render_template("profile.html")
 
