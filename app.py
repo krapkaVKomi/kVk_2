@@ -202,11 +202,11 @@ def profile():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             name_add = ''
-            flag = False
-            for i in filename:
+            flag = True
+            for i in reversed(filename):
                 if i == '.':
-                    flag = True
-                if flag == True:
+                    flag = False
+                if flag == False:
                     name_add += i
             a = str(datetime.utcnow())
             b = ''
@@ -214,7 +214,7 @@ def profile():
             for i in a:
                 if i in c:
                     b += i
-            avatar = b + 'id' + str(current_user.id) + name_add
+            avatar = b + 'id-avatar' + str(current_user.id) + name_add
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], avatar))
             avatar = 'static/images/' + avatar
             print(avatar)
