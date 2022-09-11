@@ -50,7 +50,7 @@ class User(db.Model, UserMixin):
     active = db.Column(db.Boolean())
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
     posts = db.relationship('Articles', backref='poster')
-    avatar = db.Column(db.String(50), nullable=True)
+    avatar = db.Column(db.Text, nullable=True)
     name = db.Column(db.String(50))
 
 
@@ -185,9 +185,13 @@ def post(id):
 
 
 @login_required
+#@app.route('/profile')
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
+    id = current_user.id
+    user_profile = User.query.get(id)
     if request.method == 'POST':
+         # загрузка аватарки
         erors = []
         if 'file' not in request.files:
             erors.append('ПОМИЛКА!   Неможу прочитати файл')
@@ -198,7 +202,7 @@ def profile():
         if file.filename == '':
             erors.append('ПОМИЛКА!   Немає вибраного файлу')
             return render_template("profile.html", erors=erors)
-
+        # збереження аватарки
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             name_add = ''
@@ -206,27 +210,26 @@ def profile():
             for i in reversed(filename):
                 if i == '.':
                     flag = False
-                if flag == False:
+                if flag == True:
                     name_add += i
+            new_name = '.'
+            for i in reversed(name_add):
+                new_name += i
             a = str(datetime.utcnow())
             b = ''
             c = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
             for i in a:
                 if i in c:
                     b += i
-            avatar = b + 'id-avatar' + str(current_user.id) + name_add
+            avatar = b + 'id-avatar' + str(current_user.id) + new_name
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], avatar))
-            avatar = 'static/images/' + avatar
-            print(avatar)
-            img = Avatars(img=avatar)
-            try:
-                db.session.add(img)
-                db.session.commit()
-            except:
-                return "ERROR WRITING TO DB"
 
-            return render_template("profile.html")
-    return render_template("profile.html")
+            current_user.avatar = avatar
+            db.session.commit()
+            return redirect('/profile')
+
+    else:
+        return render_template("profile.html", user_profile=current_user)
 
 
 if __name__ == "__main__":

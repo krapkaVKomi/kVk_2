@@ -9,8 +9,9 @@ profile
 
 
 <div class="container mt-5">
-    <h5>{{ current_user.id }}</h5>
-    <h5>{{ current_user.email }}</h5>
+    <h5>{{ user_profile.id }}</h5>
+    <h5>{{ user_profile.email }}</h5>
+    <img src="{{ url_for('static', filename='images/' + current_user.avatar)}}" width="200" align="right">
             {% for i in erors %}
              <p style="color:crimson ;">{{ i }}</p>
             {% endfor %}

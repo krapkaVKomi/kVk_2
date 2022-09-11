@@ -46,10 +46,14 @@
         </ul>
         {% endif %}  
       </div>
-
+        {% if current_user.is_anonymous == True %}
         <a href="/profile" class="d-flex align-items-center text-white text-decoration-none" aria-expanded="false">
         <img src="https://icon-library.com/images/icon-person/icon-person-24.jpg" alt="person" width="32" height="32" class="rounded-circle me-2">
-        <strong></strong>
+         {% endif %}
+            {% if current_user.is_anonymous != True %}
+        <a href="/profile" class="d-flex align-items-center text-white text-decoration-none" aria-expanded="false">
+        <img src="{{ url_for('static', filename='images/' + current_user.avatar)}}" alt="person" width="32" height="32" class="rounded-circle me-2">
+            {% endif %}
       </a>
 
     </div>
