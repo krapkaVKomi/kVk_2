@@ -138,7 +138,7 @@ def registration():
             pass
         # створюємо і відправляємо екземпляр класу User
         if len(erors) == 0:
-            new_user = User(email=email, password=password, active=1, name=name)
+            new_user = User(email=email, password=password, active=1, name=name, avatar="defolt.jpg")
             try:
                 db.session.add(new_user)
                 db.session.commit()
@@ -172,8 +172,12 @@ def upload_file():
 @app.route('/index')
 @app.route('/')
 def index():
+    """
+    q = request.args.get('q')
+    if q:
+        posts = Articles.query.filter(Articles.title.contains(q) | Articles.intro.contains(q)).all()
+    """
     posts = Articles.query.order_by(Articles.date.desc()).all()
-
     pages = Articles.query.order_by(Articles.date.desc()).paginate(per_page=5)
     return render_template("posts.html", posts=posts, pages=pages)
 
@@ -185,7 +189,6 @@ def post(id):
 
 
 @login_required
-#@app.route('/profile')
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
     id = current_user.id
