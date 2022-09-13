@@ -7,10 +7,22 @@
 
 {% block body %}
 <div class="container mt-5">
-    <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
-          <input type="search" class="form-control form-control-dark text-bg-dark" placeholder="Search..." aria-label="Search">
+    <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search" method="GET">
+          <input type="search" class="form-control form-control-dark text-bg-dark" name="q" value="{{ request.args.get('q', '') }}" placeholder="Search..." aria-label="Search" >
     </form><br>
+    {% if a != False %}
+        {% for i in posts %}
+ <br>
+    <div class="h-100 p-5 bg-light border rounded-3">
+        <h1>{{ i.title }}</h1>
+        <h4>{{ i.intro }}</h4>
+    <a class="btn btn-outline-secondary" href="/posts/{{ i.id }}">Читати статтю</a>
+        <p>{{ i.date.date() }}</p>
+        </div>
+    {% endfor %}
+    {% endif %}
 
+{% if a == False %}
     {% for i in pages.items %}
  <br>
     <div class="h-100 p-5 bg-light border rounded-3">
@@ -23,6 +35,7 @@
  </div>
 
 <nav class="container mt-5">
+
     <nav aria-label="...">
   <ul class="pagination">
       {% if pages.has_prev %}
@@ -33,6 +46,7 @@
       {% endif %}
   </ul>
 </nav>
+    {% endif %}
 </nav>
 
 {% endblock %}
